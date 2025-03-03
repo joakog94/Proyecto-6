@@ -8,9 +8,9 @@ const lanzarSemilla = async () => {
       'mongodb+srv://gomezjoachim94:f3H3Cv6VzC7K70tU@cluster0.kbh51.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
     )
     await Marca.collection.drop()
-    console.log('Peliculas eliminadas')
+    console.log('marcas eliminadas')
     await Marca.insertMany(marcas)
-    console.log('Peliculas introducidas')
+    console.log('marcas introducidas')
     await mongoose.disconnect()
   } catch (error) {
     console.log('Error en lanzar semilla')

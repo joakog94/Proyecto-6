@@ -46,9 +46,10 @@ const putSeccion = async (req, res, next) => {
       )
     }
 
+    const oldSeccion = await Seccion.findById(id)
     const newSeccion = new Seccion(req.body)
     newSeccion._id = id
-
+    newSeccion.marcas = [...oldSeccion.marcas, ...req.body.marcas]
     const seccionUpdated = await Seccion.findByIdAndUpdate(id, newSeccion, {
       new: true
     })
