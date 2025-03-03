@@ -39,20 +39,34 @@ const postSeccion = async (req, res, next) => {
 const putSeccion = async (req, res, next) => {
   try {
     const { id } = req.params
-    if (req.body.marcas && Array.isArray(req.body.marcas)) {
-      // Eliminar duplicados del array de marcas
-      req.body.marcas = Array.from(
-        new Set(req.body.marcas.map((id) => id.toString()))
-      )
+
+    // 1. Validar que "marcas" sea un array (si existe)
+    if (req.body.marcas !== undefined && !Array.isArray(req.body.marcas)) {
+      return res
+        .status(400)
+        .json({ error: "El campo 'marcas' debe ser un array" })
     }
 
+    // 2. Obtener la sección actual desde la base de datos
     const oldSeccion = await Seccion.findById(id)
-    const newSeccion = new Seccion(req.body)
-    newSeccion._id = id
-    newSeccion.marcas = [...oldSeccion.marcas, ...req.body.marcas]
-    const seccionUpdated = await Seccion.findByIdAndUpdate(id, newSeccion, {
-      new: true
-    })
+
+    // 3. Combinar marcas antiguas y nuevas (si existen), eliminando duplicados
+    const nuevasMarcas = req.body.marcas
+      ? Array.from(new Set(req.body.marcas.map((id) => id.toString())))
+      : oldSeccion.marcas
+
+    const newSeccion = [...oldSeccion.marcas, ...nuevasMarcas]
+    const marcasUnicas = Array.from(
+      new Set(newSeccion.map((id) => id.toString()))
+    )
+
+    // 4. Actualizar solo el campo "marcas" sin afectar otros campos
+    const seccionUpdated = await Seccion.findByIdAndUpdate(
+      id,
+      { $set: { marcas: marcasUnicas } },
+      { new: true }
+    ).populate('marcas')
+
     return res.status(200).json(seccionUpdated)
   } catch (error) {
     return res.status(404).json('Error en la petición')
