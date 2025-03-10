@@ -50,14 +50,12 @@ const putSeccion = async (req, res, next) => {
     // 2. Obtener la sección actual desde la base de datos
     const oldSeccion = await Seccion.findById(id)
 
-    // 3. Combinar marcas antiguas y nuevas (si existen), eliminando duplicados
-    const nuevasMarcas = req.body.marcas
-      ? Array.from(new Set(req.body.marcas.map((id) => id.toString())))
-      : oldSeccion.marcas
-
-    const newSeccion = [...oldSeccion.marcas, ...nuevasMarcas]
+    // 3. Combinar marcas antiguas y nuevas, eliminando duplicados en el conjunto total
     const marcasUnicas = Array.from(
-      new Set(newSeccion.map((id) => id.toString()))
+      new Set([
+        ...oldSeccion.marcas.map((id) => id.toString()),
+        ...req.body.marcas.map((id) => id.toString())
+      ])
     )
 
     // 4. Actualizar solo el campo "marcas" sin afectar otros campos
